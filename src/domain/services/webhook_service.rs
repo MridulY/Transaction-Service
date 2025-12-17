@@ -54,7 +54,9 @@ impl WebhookService {
         let account_id = transaction
             .from_account_id
             .or(transaction.to_account_id)
-            .ok_or_else(|| AppError::Internal("Transaction has no associated account".to_string()))?;
+            .ok_or_else(|| {
+                AppError::Internal("Transaction has no associated account".to_string())
+            })?;
 
         let webhooks = self
             .webhook_repo
@@ -71,12 +73,8 @@ impl WebhookService {
                 }
             });
 
-            let delivery = WebhookDelivery::new(
-                webhook.id,
-                transaction.id,
-                event_type.to_string(),
-                payload,
-            );
+            let delivery =
+                WebhookDelivery::new(webhook.id, transaction.id, event_type.to_string(), payload);
 
             self.webhook_repo.create_delivery(&delivery).await?;
         }

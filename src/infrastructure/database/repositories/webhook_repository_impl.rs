@@ -26,14 +26,14 @@ impl WebhookRepository for PostgresWebhookRepository {
             RETURNING *
             "#,
         )
-        .bind(&webhook.id)
-        .bind(&webhook.account_id)
+        .bind(webhook.id)
+        .bind(webhook.account_id)
         .bind(&webhook.url)
         .bind(&webhook.secret)
         .bind(&webhook.events)
-        .bind(&webhook.is_active)
-        .bind(&webhook.created_at)
-        .bind(&webhook.updated_at)
+        .bind(webhook.is_active)
+        .bind(webhook.created_at)
+        .bind(webhook.updated_at)
         .fetch_one(&self.pool)
         .await?;
 
@@ -109,15 +109,15 @@ impl WebhookRepository for PostgresWebhookRepository {
             RETURNING *
             "#,
         )
-        .bind(&delivery.id)
-        .bind(&delivery.webhook_id)
-        .bind(&delivery.transaction_id)
+        .bind(delivery.id)
+        .bind(delivery.webhook_id)
+        .bind(delivery.transaction_id)
         .bind(&delivery.event_type)
         .bind(&delivery.payload)
         .bind(&delivery.status)
-        .bind(&delivery.attempt_count)
-        .bind(&delivery.next_retry_at)
-        .bind(&delivery.created_at)
+        .bind(delivery.attempt_count)
+        .bind(delivery.next_retry_at)
+        .bind(delivery.created_at)
         .fetch_one(&self.pool)
         .await?;
 
@@ -140,12 +140,11 @@ impl WebhookRepository for PostgresWebhookRepository {
     }
 
     async fn find_delivery_by_id(&self, id: Uuid) -> AppResult<Option<WebhookDelivery>> {
-        let result = sqlx::query_as::<_, WebhookDelivery>(
-            "SELECT * FROM webhook_deliveries WHERE id = $1"
-        )
-        .bind(id)
-        .fetch_optional(&self.pool)
-        .await?;
+        let result =
+            sqlx::query_as::<_, WebhookDelivery>("SELECT * FROM webhook_deliveries WHERE id = $1")
+                .bind(id)
+                .fetch_optional(&self.pool)
+                .await?;
 
         Ok(result)
     }
@@ -228,12 +227,12 @@ impl WebhookRepository for PostgresWebhookRepository {
             "#,
         )
         .bind(&delivery.status)
-        .bind(&delivery.attempt_count)
-        .bind(&delivery.last_attempt_at)
-        .bind(&delivery.next_retry_at)
-        .bind(&delivery.response_code)
+        .bind(delivery.attempt_count)
+        .bind(delivery.last_attempt_at)
+        .bind(delivery.next_retry_at)
+        .bind(delivery.response_code)
         .bind(&delivery.response_body)
-        .bind(&delivery.id)
+        .bind(delivery.id)
         .execute(&self.pool)
         .await?;
 

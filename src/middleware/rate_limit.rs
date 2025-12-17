@@ -1,8 +1,8 @@
 use axum::{
     extract::{Request, State},
+    http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
-    http::StatusCode,
 };
 use std::sync::Arc;
 
@@ -22,9 +22,7 @@ pub async fn rate_limit_middleware(
     let auth_account = request
         .extensions()
         .get::<AuthenticatedAccount>()
-        .ok_or_else(|| {
-            RateLimitResponse::error("Authentication required for rate limiting")
-        })?;
+        .ok_or_else(|| RateLimitResponse::error("Authentication required for rate limiting"))?;
 
     // Check rate limit
     let limit_info = rate_limiter.check_with_info(auth_account.api_key_id).await;
@@ -103,10 +101,7 @@ impl IntoResponse for RateLimitResponse {
         let headers = response.headers_mut();
 
         if let Some(limit) = self.limit {
-            headers.insert(
-                "X-RateLimit-Limit",
-                limit.to_string().parse().unwrap(),
-            );
+            headers.insert("X-RateLimit-Limit", limit.to_string().parse().unwrap());
         }
 
         if let Some(remaining) = self.remaining {
@@ -121,10 +116,7 @@ impl IntoResponse for RateLimitResponse {
                 "X-RateLimit-Reset",
                 reset_after.to_string().parse().unwrap(),
             );
-            headers.insert(
-                "Retry-After",
-                reset_after.to_string().parse().unwrap(),
-            );
+            headers.insert("Retry-After", reset_after.to_string().parse().unwrap());
         }
 
         response

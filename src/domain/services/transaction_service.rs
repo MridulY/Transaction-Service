@@ -29,18 +29,11 @@ impl TransactionService {
         }
 
         if amount <= 0 {
-            return Err(AppError::Validation(
-                "Amount must be positive".to_string(),
-            ));
+            return Err(AppError::Validation("Amount must be positive".to_string()));
         }
 
-        let transaction = Transaction::new_credit(
-            account_id,
-            amount,
-            currency,
-            description,
-            idempotency_key,
-        );
+        let transaction =
+            Transaction::new_credit(account_id, amount, currency, description, idempotency_key);
 
         self.transaction_repo
             .execute_credit(&transaction, account_id, amount)
@@ -62,18 +55,11 @@ impl TransactionService {
         }
 
         if amount <= 0 {
-            return Err(AppError::Validation(
-                "Amount must be positive".to_string(),
-            ));
+            return Err(AppError::Validation("Amount must be positive".to_string()));
         }
 
-        let transaction = Transaction::new_debit(
-            account_id,
-            amount,
-            currency,
-            description,
-            idempotency_key,
-        );
+        let transaction =
+            Transaction::new_debit(account_id, amount, currency, description, idempotency_key);
 
         self.transaction_repo
             .execute_debit(&transaction, account_id, amount)
@@ -96,9 +82,7 @@ impl TransactionService {
         }
 
         if amount <= 0 {
-            return Err(AppError::Validation(
-                "Amount must be positive".to_string(),
-            ));
+            return Err(AppError::Validation("Amount must be positive".to_string()));
         }
 
         if from_account_id == to_account_id {

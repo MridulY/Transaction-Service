@@ -59,8 +59,7 @@ impl Config {
         };
 
         let database = DatabaseConfig {
-            url: env::var("DATABASE_URL")
-                .expect("DATABASE_URL must be set"),
+            url: env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
             max_connections: env::var("DATABASE_MAX_CONNECTIONS")
                 .unwrap_or_else(|_| "20".to_string())
                 .parse()?,

@@ -45,8 +45,6 @@ pub fn init_logging_pretty() {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_logging_functions_exist() {
         // These functions should exist and have correct signatures

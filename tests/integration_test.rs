@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -15,8 +14,9 @@ mod integration_tests {
     use super::*;
 
     async fn setup_test_db() -> PgPool {
-        let database_url = std::env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "postgresql://postgres:password@localhost:5432/transaction_service_test".to_string());
+        let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+            "postgresql://postgres:password@localhost:5432/transaction_service_test".to_string()
+        });
 
         let pool = sqlx::PgPool::connect(&database_url)
             .await
@@ -33,10 +33,12 @@ mod integration_tests {
 
     async fn cleanup_test_db(pool: &PgPool) {
         // Clean up test data
-        sqlx::query("TRUNCATE accounts, api_keys, transactions, webhooks, webhook_deliveries CASCADE")
-            .execute(pool)
-            .await
-            .ok();
+        sqlx::query(
+            "TRUNCATE accounts, api_keys, transactions, webhooks, webhook_deliveries CASCADE",
+        )
+        .execute(pool)
+        .await
+        .ok();
     }
 
     #[tokio::test]
@@ -47,7 +49,7 @@ mod integration_tests {
         let account_id = Uuid::new_v4();
         let result = sqlx::query(
             "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())"
+             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
         .bind("Test Account")
@@ -82,11 +84,14 @@ mod integration_tests {
         for (id, name) in [(account1_id, "Account 1"), (account2_id, "Account 2")] {
             sqlx::query(
                 "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
-                 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())"
+                 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
             )
             .bind(id)
             .bind(name)
-            .bind(format!("{}@example.com", name.to_lowercase().replace(" ", "")))
+            .bind(format!(
+                "{}@example.com",
+                name.to_lowercase().replace(" ", "")
+            ))
             .bind("USD")
             .bind(100000i64) // $1000.00
             .execute(&pool)
@@ -102,7 +107,7 @@ mod integration_tests {
         // Debit from account1
         sqlx::query(
             "UPDATE accounts SET balance = balance - $1, updated_at = NOW()
-             WHERE id = $2 AND balance >= $1"
+             WHERE id = $2 AND balance >= $1",
         )
         .bind(transfer_amount)
         .bind(account1_id)
@@ -113,7 +118,7 @@ mod integration_tests {
         // Credit to account2
         sqlx::query(
             "UPDATE accounts SET balance = balance + $1, updated_at = NOW()
-             WHERE id = $2"
+             WHERE id = $2",
         )
         .bind(transfer_amount)
         .bind(account2_id)
@@ -151,7 +156,7 @@ mod integration_tests {
         // Create account with low balance
         sqlx::query(
             "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())"
+             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
         .bind("Test Account")
@@ -165,7 +170,7 @@ mod integration_tests {
         // Try to debit more than balance
         let result = sqlx::query(
             "UPDATE accounts SET balance = balance - $1, updated_at = NOW()
-             WHERE id = $2 AND balance >= $1"
+             WHERE id = $2 AND balance >= $1",
         )
         .bind(20000i64) // Try to debit $200.00
         .bind(account_id)
@@ -198,7 +203,7 @@ mod integration_tests {
         // Create account
         sqlx::query(
             "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())"
+             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
         .bind("Test Account")
@@ -259,7 +264,7 @@ mod integration_tests {
         // Create account
         sqlx::query(
             "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())"
+             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
         .bind("Test Account")

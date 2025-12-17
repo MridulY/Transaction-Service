@@ -55,7 +55,12 @@ pub struct WebhookDelivery {
 }
 
 impl WebhookDelivery {
-    pub fn new(webhook_id: Uuid, transaction_id: Uuid, event_type: String, payload: JsonValue) -> Self {
+    pub fn new(
+        webhook_id: Uuid,
+        transaction_id: Uuid,
+        event_type: String,
+        payload: JsonValue,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             webhook_id,
@@ -73,8 +78,7 @@ impl WebhookDelivery {
     }
 
     pub fn can_retry(&self, max_attempts: u32) -> bool {
-        self.status == WebhookDeliveryStatus::Pending
-            && self.attempt_count < max_attempts as i32
+        self.status == WebhookDeliveryStatus::Pending && self.attempt_count < max_attempts as i32
     }
 
     pub fn record_attempt(&mut self, response_code: i32, response_body: String, success: bool) {
@@ -97,10 +101,10 @@ impl WebhookDelivery {
     pub fn calculate_next_retry(&mut self) {
         let backoff_seconds = match self.attempt_count {
             0 => 0,
-            1 => 60,           // 1 minute
-            2 => 600,          // 10 minutes
-            3 => 3600,         // 1 hour
-            _ => 21600,        // 6 hours
+            1 => 60,    // 1 minute
+            2 => 600,   // 10 minutes
+            3 => 3600,  // 1 hour
+            _ => 21600, // 6 hours
         };
 
         self.next_retry_at = Some(Utc::now() + chrono::Duration::seconds(backoff_seconds));

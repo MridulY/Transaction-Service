@@ -26,12 +26,12 @@ impl ApiKeyRepository for PostgresApiKeyRepository {
             RETURNING *
             "#,
         )
-        .bind(&api_key.id)
-        .bind(&api_key.account_id)
+        .bind(api_key.id)
+        .bind(api_key.account_id)
         .bind(&api_key.key_hash)
         .bind(&api_key.name)
-        .bind(&api_key.is_active)
-        .bind(&api_key.created_at)
+        .bind(api_key.is_active)
+        .bind(api_key.created_at)
         .fetch_one(&self.pool)
         .await?;
 

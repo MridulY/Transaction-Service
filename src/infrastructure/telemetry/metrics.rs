@@ -4,7 +4,6 @@ use std::time::Duration;
 /// Metrics for transaction service
 ///
 /// Production-grade metrics using Prometheus format
-
 pub struct MetricsRecorder {
     handle: PrometheusHandle,
 }
@@ -15,7 +14,9 @@ impl MetricsRecorder {
         let handle = PrometheusBuilder::new()
             .set_buckets_for_metric(
                 Matcher::Full("http_request_duration_seconds".to_string()),
-                &[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
+                &[
+                    0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0,
+                ],
             )?
             .set_buckets_for_metric(
                 Matcher::Full("transaction_processing_duration_seconds".to_string()),

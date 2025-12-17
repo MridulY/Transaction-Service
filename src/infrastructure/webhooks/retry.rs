@@ -15,8 +15,8 @@ impl Default for RetryStrategy {
     fn default() -> Self {
         Self {
             max_attempts: 5,
-            initial_backoff_seconds: 60,      // 1 minute
-            max_backoff_seconds: 21600,       // 6 hours
+            initial_backoff_seconds: 60, // 1 minute
+            max_backoff_seconds: 21600,  // 6 hours
             backoff_multiplier: 10.0,
         }
     }
@@ -43,11 +43,11 @@ impl RetryStrategy {
         }
 
         let backoff_seconds = match attempt_count {
-            0 => 0,  // Immediate first attempt
+            0 => 0, // Immediate first attempt
             1 => self.initial_backoff_seconds,
             n => {
-                let exp_backoff = (self.initial_backoff_seconds as f64)
-                    * self.backoff_multiplier.powi((n - 1) as i32);
+                let exp_backoff =
+                    (self.initial_backoff_seconds as f64) * self.backoff_multiplier.powi(n - 1);
                 exp_backoff.min(self.max_backoff_seconds as f64) as i64
             }
         };

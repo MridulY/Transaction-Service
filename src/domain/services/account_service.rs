@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::domain::models::{Account, ApiKey, generate_api_key, hash_api_key};
+use crate::domain::models::{generate_api_key, hash_api_key, Account, ApiKey};
 use crate::domain::repositories::{AccountRepository, ApiKeyRepository};
 use crate::utils::{AppError, AppResult};
 

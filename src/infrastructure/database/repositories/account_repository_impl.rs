@@ -26,14 +26,14 @@ impl AccountRepository for PostgresAccountRepository {
             RETURNING *
             "#,
         )
-        .bind(&account.id)
+        .bind(account.id)
         .bind(&account.business_name)
         .bind(&account.email)
-        .bind(&account.balance)
+        .bind(account.balance)
         .bind(&account.currency)
         .bind(&account.status)
-        .bind(&account.created_at)
-        .bind(&account.updated_at)
+        .bind(account.created_at)
+        .bind(account.updated_at)
         .fetch_one(&self.pool)
         .await?;
 
@@ -92,10 +92,10 @@ impl AccountRepository for PostgresAccountRepository {
         )
         .bind(&account.business_name)
         .bind(&account.email)
-        .bind(&account.balance)
+        .bind(account.balance)
         .bind(&account.currency)
         .bind(&account.status)
-        .bind(&account.id)
+        .bind(account.id)
         .fetch_one(&self.pool)
         .await?;
 

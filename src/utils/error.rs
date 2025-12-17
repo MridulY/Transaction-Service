@@ -65,16 +65,25 @@ impl IntoResponse for AppError {
                     None,
                 )
             }
-            AppError::NotFound(ref msg) => {
-                (StatusCode::NOT_FOUND, "RESOURCE_NOT_FOUND", msg.as_str(), None)
-            }
+            AppError::NotFound(ref msg) => (
+                StatusCode::NOT_FOUND,
+                "RESOURCE_NOT_FOUND",
+                msg.as_str(),
+                None,
+            ),
             AppError::Unauthorized(ref msg) => {
                 (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", msg.as_str(), None)
             }
-            AppError::BadRequest(ref msg) => {
-                (StatusCode::BAD_REQUEST, "INVALID_REQUEST", msg.as_str(), None)
-            }
-            AppError::InsufficientFunds { required, available } => {
+            AppError::BadRequest(ref msg) => (
+                StatusCode::BAD_REQUEST,
+                "INVALID_REQUEST",
+                msg.as_str(),
+                None,
+            ),
+            AppError::InsufficientFunds {
+                required,
+                available,
+            } => {
                 let mut details = HashMap::new();
                 details.insert("required".to_string(), serde_json::json!(required));
                 details.insert("available".to_string(), serde_json::json!(available));
@@ -106,9 +115,12 @@ impl IntoResponse for AppError {
                     None,
                 )
             }
-            AppError::Validation(ref msg) => {
-                (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", msg.as_str(), None)
-            }
+            AppError::Validation(ref msg) => (
+                StatusCode::BAD_REQUEST,
+                "VALIDATION_ERROR",
+                msg.as_str(),
+                None,
+            ),
             AppError::WebhookDeliveryFailed(ref msg) => {
                 tracing::warn!("Webhook delivery failed: {}", msg);
                 (

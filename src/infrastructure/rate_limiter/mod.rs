@@ -3,11 +3,14 @@ use governor::{
     state::{InMemoryState, NotKeyed},
     Quota, RateLimiter as GovernorRateLimiter,
 };
+use std::collections::HashMap;
 use std::num::NonZeroU32;
 use std::sync::Arc;
-use std::collections::HashMap;
 use tokio::sync::RwLock;
 use uuid::Uuid;
+
+/// Type alias for the rate limiter
+type ApiKeyLimiter = Arc<GovernorRateLimiter<NotKeyed, InMemoryState, DefaultClock>>;
 
 /// Production-grade rate limiter using token bucket algorithm
 ///
@@ -18,7 +21,7 @@ use uuid::Uuid;
 /// - Configurable quota
 #[derive(Clone)]
 pub struct RateLimiter {
-    limiters: Arc<RwLock<HashMap<Uuid, Arc<GovernorRateLimiter<NotKeyed, InMemoryState, DefaultClock>>>>>,
+    limiters: Arc<RwLock<HashMap<Uuid, ApiKeyLimiter>>>,
     quota: Quota,
 }
 
@@ -64,7 +67,7 @@ impl RateLimiter {
     /// Returns the number of requests remaining in the current window
     pub async fn remaining(&self, api_key_id: Uuid) -> Option<u32> {
         let limiters = self.limiters.read().await;
-        limiters.get(&api_key_id).map(|limiter| {
+        limiters.get(&api_key_id).map(|_limiter| {
             // Calculate remaining from quota
             // This is an approximation since governor doesn't expose this directly
             self.quota.burst_size().get()

@@ -21,7 +21,8 @@ pub async fn create_webhook(
         .validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
 
-    let webhook = state.webhook_service
+    let webhook = state
+        .webhook_service
         .create_webhook(auth.account_id, payload.url, payload.secret, payload.events)
         .await?;
 

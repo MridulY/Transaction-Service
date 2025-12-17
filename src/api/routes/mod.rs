@@ -45,10 +45,16 @@ pub fn create_router(
     // Protected routes with authentication and rate limiting
     let protected_routes = Router::new()
         .route("/api/v1/accounts/me", get(handlers::get_account))
-        .route("/api/v1/accounts/me/balance", get(handlers::get_account_balance))
+        .route(
+            "/api/v1/accounts/me/balance",
+            get(handlers::get_account_balance),
+        )
         .route("/api/v1/transactions/credit", post(handlers::create_credit))
         .route("/api/v1/transactions/debit", post(handlers::create_debit))
-        .route("/api/v1/transactions/transfer", post(handlers::create_transfer))
+        .route(
+            "/api/v1/transactions/transfer",
+            post(handlers::create_transfer),
+        )
         .route("/api/v1/transactions/:id", get(handlers::get_transaction))
         .route("/api/v1/transactions", get(handlers::list_transactions))
         .route("/api/v1/webhooks", post(handlers::create_webhook))

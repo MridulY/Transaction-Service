@@ -28,7 +28,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     init_tracing(&config.telemetry)?;
     let _metrics_recorder = MetricsRecorder::init()?;
 
-    tracing::info!("Starting Transaction Service v{}", env!("CARGO_PKG_VERSION"));
+    tracing::info!(
+        "Starting Transaction Service v{}",
+        env!("CARGO_PKG_VERSION")
+    );
 
     // Create database connection pool
     let pool = create_pool(&config.database.url, config.database.max_connections).await?;
@@ -40,11 +43,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Database migrations completed");
 
     // Initialize repositories
-    let account_repo: Arc<dyn AccountRepository> = Arc::new(PostgresAccountRepository::new(pool.clone()));
-    let api_key_repo: Arc<dyn ApiKeyRepository> = Arc::new(PostgresApiKeyRepository::new(pool.clone()));
+    let account_repo: Arc<dyn AccountRepository> =
+        Arc::new(PostgresAccountRepository::new(pool.clone()));
+    let api_key_repo: Arc<dyn ApiKeyRepository> =
+        Arc::new(PostgresApiKeyRepository::new(pool.clone()));
     let transaction_repo: Arc<dyn TransactionRepository> =
         Arc::new(PostgresTransactionRepository::new(pool.clone()));
-    let webhook_repo: Arc<dyn WebhookRepository> = Arc::new(PostgresWebhookRepository::new(pool.clone()));
+    let webhook_repo: Arc<dyn WebhookRepository> =
+        Arc::new(PostgresWebhookRepository::new(pool.clone()));
 
     // Initialize services
     let account_service = Arc::new(AccountService::new(

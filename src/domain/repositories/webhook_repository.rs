@@ -9,7 +9,11 @@ pub trait WebhookRepository: Send + Sync {
     async fn create(&self, webhook: &Webhook) -> AppResult<Webhook>;
     async fn find_by_id(&self, id: Uuid) -> AppResult<Option<Webhook>>;
     async fn find_by_account_id(&self, account_id: Uuid) -> AppResult<Vec<Webhook>>;
-    async fn find_active_by_account_and_event(&self, account_id: Uuid, event: &str) -> AppResult<Vec<Webhook>>;
+    async fn find_active_by_account_and_event(
+        &self,
+        account_id: Uuid,
+        event: &str,
+    ) -> AppResult<Vec<Webhook>>;
     async fn delete(&self, id: Uuid) -> AppResult<()>;
 
     async fn create_delivery(&self, delivery: &WebhookDelivery) -> AppResult<WebhookDelivery>;

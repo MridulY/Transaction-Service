@@ -24,7 +24,6 @@ use super::signature::generate_signature;
 /// - Metrics and tracing
 pub struct WebhookDispatcher {
     client: Client,
-    config: WebhookConfig,
     retry_strategy: RetryStrategy,
     webhook_repo: Arc<dyn WebhookRepository>,
 }
@@ -42,7 +41,6 @@ impl WebhookDispatcher {
 
         Self {
             client,
-            config,
             retry_strategy,
             webhook_repo,
         }
@@ -258,8 +256,6 @@ pub fn spawn_webhook_worker(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_dispatcher_creation() {
         // This test just ensures the types compile correctly

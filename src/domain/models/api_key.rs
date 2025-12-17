@@ -48,7 +48,10 @@ pub fn generate_api_key() -> String {
     use base64::Engine;
     use rand::Rng;
     let random_bytes: Vec<u8> = (0..32).map(|_| rand::thread_rng().gen()).collect();
-    format!("sk_{}", base64::engine::general_purpose::STANDARD.encode(&random_bytes))
+    format!(
+        "sk_{}",
+        base64::engine::general_purpose::STANDARD.encode(&random_bytes)
+    )
 }
 
 pub fn hash_api_key(key: &str) -> Result<String, bcrypt::BcryptError> {

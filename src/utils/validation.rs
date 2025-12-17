@@ -27,6 +27,8 @@ pub fn validate_url(url: &str) -> Result<(), ValidationError> {
     if url.starts_with("http://") || url.starts_with("https://") {
         Ok(())
     } else {
-        Err(ValidationError::new("URL must start with http:// or https://"))
+        Err(ValidationError::new(
+            "URL must start with http:// or https://",
+        ))
     }
 }

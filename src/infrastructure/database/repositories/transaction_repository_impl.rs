@@ -29,17 +29,17 @@ impl TransactionRepository for PostgresTransactionRepository {
             RETURNING *
             "#,
         )
-        .bind(&transaction.id)
+        .bind(transaction.id)
         .bind(&transaction.idempotency_key)
         .bind(&transaction.transaction_type)
-        .bind(&transaction.from_account_id)
-        .bind(&transaction.to_account_id)
-        .bind(&transaction.amount)
+        .bind(transaction.from_account_id)
+        .bind(transaction.to_account_id)
+        .bind(transaction.amount)
         .bind(&transaction.currency)
         .bind(&transaction.status)
         .bind(&transaction.description)
         .bind(&transaction.metadata)
-        .bind(&transaction.created_at)
+        .bind(transaction.created_at)
         .fetch_one(&self.pool)
         .await?;
 
@@ -104,7 +104,7 @@ impl TransactionRepository for PostgresTransactionRepository {
             "#,
         )
         .bind(&transaction.status)
-        .bind(&transaction.completed_at)
+        .bind(transaction.completed_at)
         .bind(id)
         .execute(&self.pool)
         .await?;
@@ -189,18 +189,18 @@ impl TransactionRepository for PostgresTransactionRepository {
             RETURNING *
             "#,
         )
-        .bind(&completed_transaction.id)
+        .bind(completed_transaction.id)
         .bind(&completed_transaction.idempotency_key)
         .bind(&completed_transaction.transaction_type)
-        .bind(&completed_transaction.from_account_id)
-        .bind(&completed_transaction.to_account_id)
-        .bind(&completed_transaction.amount)
+        .bind(completed_transaction.from_account_id)
+        .bind(completed_transaction.to_account_id)
+        .bind(completed_transaction.amount)
         .bind(&completed_transaction.currency)
         .bind(&completed_transaction.status)
         .bind(&completed_transaction.description)
         .bind(&completed_transaction.metadata)
-        .bind(&completed_transaction.created_at)
-        .bind(&completed_transaction.completed_at)
+        .bind(completed_transaction.created_at)
+        .bind(completed_transaction.completed_at)
         .fetch_one(&mut *tx)
         .await?;
 
@@ -255,18 +255,18 @@ impl TransactionRepository for PostgresTransactionRepository {
             RETURNING *
             "#,
         )
-        .bind(&completed_transaction.id)
+        .bind(completed_transaction.id)
         .bind(&completed_transaction.idempotency_key)
         .bind(&completed_transaction.transaction_type)
-        .bind(&completed_transaction.from_account_id)
-        .bind(&completed_transaction.to_account_id)
-        .bind(&completed_transaction.amount)
+        .bind(completed_transaction.from_account_id)
+        .bind(completed_transaction.to_account_id)
+        .bind(completed_transaction.amount)
         .bind(&completed_transaction.currency)
         .bind(&completed_transaction.status)
         .bind(&completed_transaction.description)
         .bind(&completed_transaction.metadata)
-        .bind(&completed_transaction.created_at)
-        .bind(&completed_transaction.completed_at)
+        .bind(completed_transaction.created_at)
+        .bind(completed_transaction.completed_at)
         .fetch_one(&mut *tx)
         .await?;
 
@@ -324,18 +324,18 @@ impl TransactionRepository for PostgresTransactionRepository {
             RETURNING *
             "#,
         )
-        .bind(&completed_transaction.id)
+        .bind(completed_transaction.id)
         .bind(&completed_transaction.idempotency_key)
         .bind(&completed_transaction.transaction_type)
-        .bind(&completed_transaction.from_account_id)
-        .bind(&completed_transaction.to_account_id)
-        .bind(&completed_transaction.amount)
+        .bind(completed_transaction.from_account_id)
+        .bind(completed_transaction.to_account_id)
+        .bind(completed_transaction.amount)
         .bind(&completed_transaction.currency)
         .bind(&completed_transaction.status)
         .bind(&completed_transaction.description)
         .bind(&completed_transaction.metadata)
-        .bind(&completed_transaction.created_at)
-        .bind(&completed_transaction.completed_at)
+        .bind(completed_transaction.created_at)
+        .bind(completed_transaction.completed_at)
         .fetch_one(&mut *tx)
         .await?;
 

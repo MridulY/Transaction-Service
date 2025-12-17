@@ -1,6 +1,6 @@
+use hex;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
-use hex;
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -105,8 +105,12 @@ mod tests {
 
         let signature = generate_signature(secret, payload, timestamp).unwrap();
 
-        // Tamper with signature
-        let tampered = signature.replace('a', 'b');
+        // Tamper with signature - replace first character
+        let mut tampered = signature.clone();
+        if let Some(first_char) = tampered.chars().next() {
+            let replacement = if first_char == 'a' { 'b' } else { 'a' };
+            tampered.replace_range(0..1, &replacement.to_string());
+        }
         let is_valid = verify_signature(secret, payload, timestamp, &tampered).unwrap();
 
         assert!(!is_valid);

@@ -1,12 +1,9 @@
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Extension, Json,
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Json};
 use validator::Validate;
 
-use crate::api::dto::{AccountResponse, BalanceResponse, CreateAccountRequest, CreateAccountResponse};
+use crate::api::dto::{
+    AccountResponse, BalanceResponse, CreateAccountRequest, CreateAccountResponse,
+};
 use crate::api::routes::AppState;
 use crate::middleware::auth::AuthenticatedAccount;
 use crate::utils::AppError;
@@ -19,7 +16,8 @@ pub async fn create_account(
         .validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
 
-    let (account, api_key) = state.account_service
+    let (account, api_key) = state
+        .account_service
         .create_account(payload.business_name, payload.email, payload.currency)
         .await?;
 

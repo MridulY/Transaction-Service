@@ -50,7 +50,8 @@ pub async fn create_credit(
         .and_then(|h| h.to_str().ok())
         .map(|s| s.to_string());
 
-    let transaction = state.transaction_service
+    let transaction = state
+        .transaction_service
         .create_credit(
             payload.account_id,
             payload.amount,
@@ -61,12 +62,16 @@ pub async fn create_credit(
         .await?;
 
     // Queue webhook
-    state.webhook_service
+    state
+        .webhook_service
         .queue_webhook(&transaction, "transaction.completed")
         .await
         .ok();
 
-    Ok((StatusCode::CREATED, Json(TransactionResponse::from(transaction))))
+    Ok((
+        StatusCode::CREATED,
+        Json(TransactionResponse::from(transaction)),
+    ))
 }
 
 pub async fn create_debit(
@@ -90,7 +95,8 @@ pub async fn create_debit(
         .and_then(|h| h.to_str().ok())
         .map(|s| s.to_string());
 
-    let transaction = state.transaction_service
+    let transaction = state
+        .transaction_service
         .create_debit(
             payload.account_id,
             payload.amount,
@@ -100,12 +106,16 @@ pub async fn create_debit(
         )
         .await?;
 
-    state.webhook_service
+    state
+        .webhook_service
         .queue_webhook(&transaction, "transaction.completed")
         .await
         .ok();
 
-    Ok((StatusCode::CREATED, Json(TransactionResponse::from(transaction))))
+    Ok((
+        StatusCode::CREATED,
+        Json(TransactionResponse::from(transaction)),
+    ))
 }
 
 pub async fn create_transfer(
@@ -129,7 +139,8 @@ pub async fn create_transfer(
         .and_then(|h| h.to_str().ok())
         .map(|s| s.to_string());
 
-    let transaction = state.transaction_service
+    let transaction = state
+        .transaction_service
         .create_transfer(
             payload.from_account_id,
             payload.to_account_id,
@@ -140,12 +151,16 @@ pub async fn create_transfer(
         )
         .await?;
 
-    state.webhook_service
+    state
+        .webhook_service
         .queue_webhook(&transaction, "transaction.completed")
         .await
         .ok();
 
-    Ok((StatusCode::CREATED, Json(TransactionResponse::from(transaction))))
+    Ok((
+        StatusCode::CREATED,
+        Json(TransactionResponse::from(transaction)),
+    ))
 }
 
 pub async fn get_transaction(
@@ -153,7 +168,10 @@ pub async fn get_transaction(
     Extension(auth): Extension<AuthenticatedAccount>,
     Path(transaction_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
-    let transaction = state.transaction_service.get_transaction(transaction_id).await?;
+    let transaction = state
+        .transaction_service
+        .get_transaction(transaction_id)
+        .await?;
 
     // Verify the user has access to this transaction
     if transaction.from_account_id != Some(auth.account_id)
@@ -172,13 +190,17 @@ pub async fn list_transactions(
     Extension(auth): Extension<AuthenticatedAccount>,
     Query(query): Query<ListQuery>,
 ) -> Result<impl IntoResponse, AppError> {
-    let transactions = state.transaction_service
+    let transactions = state
+        .transaction_service
         .list_transactions(auth.account_id, query.limit, query.offset)
         .await?;
 
     let total = transactions.len();
     let response = ListTransactionsResponse {
-        transactions: transactions.into_iter().map(TransactionResponse::from).collect(),
+        transactions: transactions
+            .into_iter()
+            .map(TransactionResponse::from)
+            .collect(),
         total,
         limit: query.limit,
         offset: query.offset,
