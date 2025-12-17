@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: transaction_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  transaction-service:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/transaction_service
+      HOST: 0.0.0.0
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_MAX_CONNECTIONS: 20
+      RATE_LIMIT_PER_MINUTE: 100
+      IDEMPOTENCY_KEY_EXPIRY_HOURS: 24
+      WEBHOOK_TIMEOUT_SECONDS: 30
+      WEBHOOK_MAX_RETRIES: 5
+      OTEL_SERVICE_NAME: transaction-service
+      RUST_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -39,7 +39,6 @@ pub fn create_router(
     // Public routes
     let public_routes = Router::new()
         .route("/health", get(handlers::health_check))
-        .route("/metrics", get(handlers::metrics))
         .route("/api/v1/accounts", post(handlers::create_account));
 
     // Protected routes with authentication and rate limiting
@@ -55,12 +54,12 @@ pub fn create_router(
         .route("/api/v1/webhooks", get(handlers::list_webhooks))
         .route("/api/v1/webhooks/:id", delete(handlers::delete_webhook))
         .layer(middleware::from_fn_with_state(
-            rate_limiter.clone(),
-            rate_limit_middleware,
-        ))
-        .layer(middleware::from_fn_with_state(
             api_key_repo.clone(),
             auth_middleware,
+        ))
+        .layer(middleware::from_fn_with_state(
+            rate_limiter.clone(),
+            rate_limit_middleware,
         ));
 
     // Combine routes
