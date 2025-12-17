@@ -63,6 +63,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-build-target-
 
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features postgres
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/transaction_service_test
+        run: sqlx migrate run
+
       - name: Run tests
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/transaction_service_test
@@ -154,6 +162,14 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features postgres
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/transaction_service_test
+        run: sqlx migrate run
 
       - name: Install tarpaulin
         run: cargo install cargo-tarpaulin
