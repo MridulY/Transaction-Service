@@ -14,9 +14,7 @@ mod integration_tests {
     use super::*;
 
     async fn setup_test_db() -> PgPool {
-        let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
-            "postgresql://postgres:password@localhost:5432/transaction_service_test".to_string()
-        });
+        let database_url = "postgresql://neondb_owner:npg_bEVCeSiv8OZ1@ep-ancient-darkness-a18e5ns9-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
         let pool = sqlx::PgPool::connect(&database_url)
             .await
@@ -48,7 +46,7 @@ mod integration_tests {
         // Create account
         let account_id = Uuid::new_v4();
         let result = sqlx::query(
-            "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
+            "INSERT INTO accounts (id, business_name, email, currency, balance, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
@@ -83,7 +81,7 @@ mod integration_tests {
 
         for (id, name) in [(account1_id, "Account 1"), (account2_id, "Account 2")] {
             sqlx::query(
-                "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
+                "INSERT INTO accounts (id, business_name, email, currency, balance, created_at, updated_at)
                  VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
             )
             .bind(id)
@@ -155,7 +153,7 @@ mod integration_tests {
 
         // Create account with low balance
         sqlx::query(
-            "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
+            "INSERT INTO accounts (id, business_name, email, currency, balance, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
@@ -202,7 +200,7 @@ mod integration_tests {
 
         // Create account
         sqlx::query(
-            "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
+            "INSERT INTO accounts (id, business_name, email, currency, balance, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
@@ -214,18 +212,17 @@ mod integration_tests {
         .await
         .unwrap();
 
-        // Create first transaction
+        // Create first transaction (credit - requires to_account_id)
         let tx1_id = Uuid::new_v4();
         sqlx::query(
-            "INSERT INTO transactions (id, account_id, transaction_type, amount, currency, balance_after, idempotency_key, status, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())"
+            "INSERT INTO transactions (id, to_account_id, transaction_type, amount, currency, idempotency_key, status, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())"
         )
         .bind(tx1_id)
         .bind(account_id)
         .bind("credit")
         .bind(5000i64)
         .bind("USD")
-        .bind(105000i64)
         .bind(idempotency_key)
         .bind("completed")
         .execute(&pool)
@@ -235,15 +232,14 @@ mod integration_tests {
         // Try to create duplicate with same idempotency key
         let tx2_id = Uuid::new_v4();
         let result = sqlx::query(
-            "INSERT INTO transactions (id, account_id, transaction_type, amount, currency, balance_after, idempotency_key, status, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())"
+            "INSERT INTO transactions (id, to_account_id, transaction_type, amount, currency, idempotency_key, status, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())"
         )
         .bind(tx2_id)
         .bind(account_id)
         .bind("credit")
         .bind(5000i64)
         .bind("USD")
-        .bind(105000i64)
         .bind(idempotency_key)
         .bind("completed")
         .execute(&pool)
@@ -263,7 +259,7 @@ mod integration_tests {
 
         // Create account
         sqlx::query(
-            "INSERT INTO accounts (id, name, email, currency, balance, created_at, updated_at)
+            "INSERT INTO accounts (id, business_name, email, currency, balance, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
         )
         .bind(account_id)
