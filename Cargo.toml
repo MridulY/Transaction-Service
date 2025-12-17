@@ -14,8 +14,8 @@ tower-http = { version = "0.5", features = ["trace", "cors", "request-id"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-# Database
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate"] }
+# Database (PostgreSQL only - no MySQL to avoid rsa vulnerability)
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate", "macros"] }
 
 # Async runtime
 tokio-util = "0.7"
@@ -51,7 +51,7 @@ anyhow = "1.0"
 thiserror = "1.0"
 
 # Validation
-validator = { version = "0.16", features = ["derive"] }
+validator = { version = "0.20", features = ["derive"] }
 
 # HMAC for webhook signatures
 hmac = "0.12"

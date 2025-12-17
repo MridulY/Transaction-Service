@@ -1,0 +1,15 @@
+# Cargo Audit Configuration
+# https://github.com/rustsec/rustsec/blob/main/cargo-audit/audit.toml.example
+
+[advisories]
+# Ignore advisories for specific IDs
+ignore = [
+    # RUSTSEC-2023-0071: rsa crate Marvin Attack
+    # This is a transitive dependency from sqlx-mysql via sqlx-macros
+    # We only use PostgreSQL, but sqlx-macros includes all database drivers by default
+    # No fix is available, and the vulnerability doesn't affect our PostgreSQL-only usage
+    "RUSTSEC-2023-0071",
+]
+
+# Allow informational warnings (unmaintained crates, etc.)
+informational_warnings = ["unmaintained"]
