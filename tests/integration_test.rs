@@ -14,7 +14,10 @@ mod integration_tests {
     use super::*;
 
     async fn setup_test_db() -> PgPool {
-        let database_url = "postgresql://neondb_owner:npg_bEVCeSiv8OZ1@ep-ancient-darkness-a18e5ns9-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+        let database_url = std::env::var("DATABASE_URL")
+            .unwrap_or_else(|_| {
+                "postgresql://postgres:postgres@localhost:5432/transaction_service".to_string()
+            });
 
         let pool = sqlx::PgPool::connect(&database_url)
             .await
