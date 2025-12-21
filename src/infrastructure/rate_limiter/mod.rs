@@ -9,16 +9,8 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
-/// Type alias for the rate limiter
 type ApiKeyLimiter = Arc<GovernorRateLimiter<NotKeyed, InMemoryState, DefaultClock>>;
 
-/// Production-grade rate limiter using token bucket algorithm
-///
-/// Features:
-/// - Per-API-key rate limiting
-/// - In-memory state (can be extended to Redis for distributed systems)
-/// - Thread-safe using RwLock
-/// - Configurable quota
 #[derive(Clone)]
 pub struct RateLimiter {
     limiters: Arc<RwLock<HashMap<Uuid, ApiKeyLimiter>>>,
@@ -26,10 +18,6 @@ pub struct RateLimiter {
 }
 
 impl RateLimiter {
-    /// Create a new rate limiter
-    ///
-    /// # Arguments
-    /// * `requests_per_minute` - Maximum requests allowed per minute
     pub fn new(requests_per_minute: u32) -> Self {
         let quota = Quota::per_minute(
             NonZeroU32::new(requests_per_minute).expect("requests_per_minute must be > 0"),
@@ -41,11 +29,7 @@ impl RateLimiter {
         }
     }
 
-    /// Check if request is allowed for given API key
-    ///
-    /// Returns true if request is allowed, false if rate limit exceeded
     pub async fn check(&self, api_key_id: Uuid) -> bool {
-        // Try to get existing limiter
         {
             let limiters = self.limiters.read().await;
             if let Some(limiter) = limiters.get(&api_key_id) {
@@ -53,7 +37,6 @@ impl RateLimiter {
             }
         }
 
-        // Create new limiter if not exists
         let mut limiters = self.limiters.write().await;
         let limiter = limiters
             .entry(api_key_id)
@@ -62,39 +45,24 @@ impl RateLimiter {
         limiter.check().is_ok()
     }
 
-    /// Get remaining quota for API key
-    ///
-    /// Returns the number of requests remaining in the current window
     pub async fn remaining(&self, api_key_id: Uuid) -> Option<u32> {
         let limiters = self.limiters.read().await;
-        limiters.get(&api_key_id).map(|_limiter| {
-            // Calculate remaining from quota
-            // This is an approximation since governor doesn't expose this directly
-            self.quota.burst_size().get()
-        })
+        limiters
+            .get(&api_key_id)
+            .map(|_limiter| self.quota.burst_size().get())
     }
 
-    /// Clean up unused limiters (for memory management)
-    ///
-    /// Should be called periodically to remove limiters for inactive API keys
     pub async fn cleanup(&self) {
         let mut limiters = self.limiters.write().await;
-
-        // In a production system, you'd track last access time and remove old entries
-        // For now, we keep all limiters (they're lightweight)
-
-        // Future enhancement: Add TTL-based cleanup
         limiters.retain(|_key, _limiter| true);
     }
 
-    /// Get total number of tracked API keys
     pub async fn tracked_keys(&self) -> usize {
         let limiters = self.limiters.read().await;
         limiters.len()
     }
 }
 
-/// Rate limit result with metadata
 #[derive(Debug)]
 pub struct RateLimitInfo {
     pub allowed: bool,
@@ -104,7 +72,6 @@ pub struct RateLimitInfo {
 }
 
 impl RateLimiter {
-    /// Check rate limit with detailed information
     pub async fn check_with_info(&self, api_key_id: Uuid) -> RateLimitInfo {
         let allowed = self.check(api_key_id).await;
         let limit = self.quota.burst_size().get();

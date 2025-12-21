@@ -9,22 +9,16 @@ use std::sync::Arc;
 use crate::infrastructure::rate_limiter::RateLimiter;
 use crate::middleware::auth::AuthenticatedAccount;
 
-/// Rate limiting middleware
-///
-/// Enforces per-API-key rate limits using token bucket algorithm
-/// Must be applied after authentication middleware to access AuthenticatedAccount
 pub async fn rate_limit_middleware(
     State(rate_limiter): State<Arc<RateLimiter>>,
     request: Request,
     next: Next,
 ) -> Result<Response, RateLimitResponse> {
-    // Extract authenticated account from request extensions
     let auth_account = request
         .extensions()
         .get::<AuthenticatedAccount>()
         .ok_or_else(|| RateLimitResponse::error("Authentication required for rate limiting"))?;
 
-    // Check rate limit
     let limit_info = rate_limiter.check_with_info(auth_account.api_key_id).await;
 
     if !limit_info.allowed {
@@ -35,7 +29,6 @@ pub async fn rate_limit_middleware(
         ));
     }
 
-    // Add rate limit headers to response
     let mut response = next.run(request).await;
 
     let headers = response.headers_mut();
@@ -55,7 +48,6 @@ pub async fn rate_limit_middleware(
     Ok(response)
 }
 
-/// Rate limit response with proper status code and headers
 #[derive(Debug)]
 pub struct RateLimitResponse {
     status: StatusCode,

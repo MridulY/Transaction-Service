@@ -29,15 +29,12 @@ pub async fn auth_middleware(
         .strip_prefix("Bearer ")
         .ok_or_else(|| AppError::Unauthorized("Invalid Authorization format".to_string()))?;
 
-    // Find all API keys and verify
-    // Note: In production, consider caching this or using a more efficient lookup
     let found_key = find_api_key_by_value(&*api_key_repo, api_key).await?;
 
     if !found_key.is_valid() {
         return Err(AppError::Unauthorized("API key is not valid".to_string()));
     }
 
-    // Update last used timestamp
     api_key_repo.update_last_used(found_key.id).await?;
 
     let auth_account = AuthenticatedAccount {
@@ -54,13 +51,6 @@ async fn find_api_key_by_value(
     repo: &dyn ApiKeyRepository,
     api_key: &str,
 ) -> Result<crate::domain::models::ApiKey, AppError> {
-    // Since bcrypt generates different hashes each time, we can't hash the input and match
-    // Instead, we need to fetch all active keys and verify against each one using bcrypt::verify
-    // In production, you'd optimize this with:
-    // 1. Store a prefix of the key for quick lookup to reduce candidates
-    // 2. Cache active keys in memory
-    // 3. Use a faster hash function with a salt for comparison
-
     let active_keys = repo.get_all_active().await?;
 
     for key in active_keys {

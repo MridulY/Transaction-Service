@@ -4,23 +4,10 @@ use sha2::Sha256;
 
 type HmacSha256 = Hmac<Sha256>;
 
-/// Generates an HMAC-SHA256 signature for webhook payloads
-///
-/// This ensures webhook authenticity by allowing recipients to verify
-/// that the webhook was sent by the transaction service.
-///
-/// # Arguments
-/// * `secret` - The webhook secret key
-/// * `payload` - The JSON payload to sign
-/// * `timestamp` - Unix timestamp to prevent replay attacks
-///
-/// # Returns
-/// The hex-encoded HMAC signature
 pub fn generate_signature(secret: &str, payload: &str, timestamp: i64) -> Result<String, String> {
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
         .map_err(|e| format!("Invalid secret key: {}", e))?;
 
-    // Include timestamp in signature to prevent replay attacks
     let message = format!("{}.{}", timestamp, payload);
     mac.update(message.as_bytes());
 
@@ -30,16 +17,6 @@ pub fn generate_signature(secret: &str, payload: &str, timestamp: i64) -> Result
     Ok(signature)
 }
 
-/// Verifies an HMAC-SHA256 signature
-///
-/// # Arguments
-/// * `secret` - The webhook secret key
-/// * `payload` - The JSON payload
-/// * `timestamp` - Unix timestamp from the webhook
-/// * `signature` - The signature to verify
-///
-/// # Returns
-/// true if signature is valid, false otherwise
 pub fn verify_signature(
     secret: &str,
     payload: &str,
@@ -47,12 +24,9 @@ pub fn verify_signature(
     signature: &str,
 ) -> Result<bool, String> {
     let expected_signature = generate_signature(secret, payload, timestamp)?;
-
-    // Use constant-time comparison to prevent timing attacks
     Ok(constant_time_compare(&expected_signature, signature))
 }
 
-/// Constant-time string comparison to prevent timing attacks
 fn constant_time_compare(a: &str, b: &str) -> bool {
     if a.len() != b.len() {
         return false;
@@ -80,8 +54,6 @@ mod tests {
         let timestamp = 1640000000;
 
         let signature = generate_signature(secret, payload, timestamp).unwrap();
-
-        // Signature should be 64 hex characters (32 bytes)
         assert_eq!(signature.len(), 64);
     }
 
@@ -105,7 +77,6 @@ mod tests {
 
         let signature = generate_signature(secret, payload, timestamp).unwrap();
 
-        // Tamper with signature - replace first character
         let mut tampered = signature.clone();
         if let Some(first_char) = tampered.chars().next() {
             let replacement = if first_char == 'a' { 'b' } else { 'a' };
@@ -124,7 +95,6 @@ mod tests {
         let sig1 = generate_signature(secret, payload, 1640000000).unwrap();
         let sig2 = generate_signature(secret, payload, 1640000001).unwrap();
 
-        // Different timestamps should produce different signatures
         assert_ne!(sig1, sig2);
     }
 

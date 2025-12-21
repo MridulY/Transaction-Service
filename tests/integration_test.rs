@@ -14,10 +14,9 @@ mod integration_tests {
     use super::*;
 
     async fn setup_test_db() -> PgPool {
-        let database_url = std::env::var("DATABASE_URL")
-            .unwrap_or_else(|_| {
-                "postgresql://postgres:postgres@localhost:5432/transaction_service".to_string()
-            });
+        let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+            "postgresql://postgres:postgres@localhost:5432/transaction_service".to_string()
+        });
 
         let pool = sqlx::PgPool::connect(&database_url)
             .await

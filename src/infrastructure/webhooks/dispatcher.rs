@@ -14,14 +14,6 @@ use crate::domain::repositories::WebhookRepository;
 use super::retry::RetryStrategy;
 use super::signature::generate_signature;
 
-/// Production-grade webhook dispatcher with retry logic
-///
-/// Features:
-/// - Asynchronous delivery with timeout
-/// - Exponential backoff retry
-/// - HMAC signature for security
-/// - Comprehensive error handling
-/// - Metrics and tracing
 pub struct WebhookDispatcher {
     client: Client,
     retry_strategy: RetryStrategy,
@@ -46,9 +38,6 @@ impl WebhookDispatcher {
         }
     }
 
-    /// Process pending webhook deliveries
-    ///
-    /// This should be called periodically by a background worker
     pub async fn process_pending_deliveries(&self) -> Result<usize, String> {
         let pending = self
             .webhook_repo
@@ -68,7 +57,6 @@ impl WebhookDispatcher {
         Ok(count)
     }
 
-    /// Process a single webhook delivery
     async fn process_delivery(&self, delivery_id: Uuid) -> Result<(), String> {
         let delivery = self
             .webhook_repo
@@ -84,7 +72,6 @@ impl WebhookDispatcher {
             .map_err(|e| format!("Failed to fetch webhook: {}", e))?
             .ok_or_else(|| "Webhook not found".to_string())?;
 
-        // Check if webhook is still active
         if !webhook.is_active {
             warn!(
                 "Skipping delivery {} - webhook {} is inactive",
@@ -93,7 +80,6 @@ impl WebhookDispatcher {
             return Ok(());
         }
 
-        // Check if we should retry
         if !self.retry_strategy.can_retry(delivery.attempt_count) {
             warn!(
                 "Delivery {} exhausted after {} attempts",
@@ -106,7 +92,6 @@ impl WebhookDispatcher {
             return Ok(());
         }
 
-        // Attempt delivery
         match self.send_webhook(&webhook, &delivery).await {
             Ok(response) => {
                 info!(
@@ -133,11 +118,9 @@ impl WebhookDispatcher {
                     delivery_id, webhook.url, e
                 );
 
-                // Determine if we should retry
                 let should_retry = self.should_retry(&e);
 
                 if should_retry && self.retry_strategy.can_retry(delivery.attempt_count + 1) {
-                    // Calculate next retry time
                     let next_retry = self
                         .retry_strategy
                         .next_retry_at(delivery.attempt_count + 1);
@@ -152,7 +135,6 @@ impl WebhookDispatcher {
                         delivery_id, next_retry
                     );
                 } else {
-                    // Mark as exhausted
                     self.webhook_repo
                         .mark_delivery_exhausted(delivery_id)
                         .await
@@ -166,7 +148,6 @@ impl WebhookDispatcher {
         }
     }
 
-    /// Send webhook HTTP request
     async fn send_webhook(
         &self,
         webhook: &Webhook,
@@ -174,14 +155,11 @@ impl WebhookDispatcher {
     ) -> Result<WebhookResponse, String> {
         let timestamp = Utc::now().timestamp();
 
-        // Serialize payload
         let payload_str = serde_json::to_string(&delivery.payload)
             .map_err(|e| format!("Failed to serialize payload: {}", e))?;
 
-        // Generate signature
         let signature = generate_signature(&webhook.secret, &payload_str, timestamp)?;
 
-        // Build request body with metadata
         let body = json!({
             "id": delivery.id,
             "event": delivery.event_type,
@@ -189,7 +167,6 @@ impl WebhookDispatcher {
             "data": delivery.payload,
         });
 
-        // Send request
         let response = self
             .client
             .post(&webhook.url)
@@ -215,7 +192,6 @@ impl WebhookDispatcher {
         })
     }
 
-    /// Determine if error is retryable
     fn should_retry(&self, error: &str) -> bool {
         self.retry_strategy.is_transient_error(error)
     }
@@ -227,9 +203,6 @@ struct WebhookResponse {
     body: String,
 }
 
-/// Background worker to process webhooks
-///
-/// Spawns a background task that processes pending deliveries every N seconds
 pub fn spawn_webhook_worker(
     dispatcher: Arc<WebhookDispatcher>,
     interval_seconds: u64,
@@ -257,8 +230,5 @@ pub fn spawn_webhook_worker(
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_dispatcher_creation() {
-        // This test just ensures the types compile correctly
-        // Full integration tests would require a test HTTP server
-    }
+    fn test_dispatcher_creation() {}
 }
